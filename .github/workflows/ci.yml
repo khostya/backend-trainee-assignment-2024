@@ -18,7 +18,7 @@ jobs:
       - name: Unit Test
         run: go test ./internal/... ./pkg/...
 
-  integration-test-radium:
+  integration-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
