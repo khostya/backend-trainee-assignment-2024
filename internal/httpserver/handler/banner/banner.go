@@ -9,24 +9,20 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
 	"io"
 	"net/http"
 	"strconv"
 )
 
 type Router struct {
-	banner    usecase.Banner
-	validator *validator.Validate
+	banner usecase.Banner
 }
 
 func New(r chi.Router, useCase usecase.Banner) {
-	validator := validator.New()
-
-	banner := Router{banner: useCase, validator: validator}
+	banner := Router{banner: useCase}
 
 	r.Use(auth.Required())
-	r.Get("/user_banner/{id}", banner.getUserBanner)
+	r.Get("/user_banner", banner.getUserBanner)
 
 	r.Group(func(r chi.Router) {
 		r.Use(auth.AdminOnly())
@@ -44,15 +40,15 @@ type Banner struct {
 	IsActive  bool   `json:"is_active"`
 }
 
-func (b Router) parseBanner(reader io.ReadCloser) (Banner, error) {
-	type Request struct {
-		TagIds    []int `json:"tag_ids"`
-		FeatureId int   `json:"feature_id"`
-		Content   any   `json:"content" validate:"json"`
-		IsActive  bool  `json:"is_active"`
-	}
+type Create struct {
+	TagIds    []int `json:"tag_ids"`
+	FeatureId int   `json:"feature_id"`
+	Content   any   `json:"content"`
+	IsActive  bool  `json:"is_active"`
+}
 
-	request := new(Request)
+func (b Router) parseBanner(reader io.ReadCloser) (Banner, error) {
+	request := new(Create)
 	err := render.DecodeJSON(reader, request)
 	if err != nil {
 		return Banner{}, err
@@ -60,7 +56,7 @@ func (b Router) parseBanner(reader io.ReadCloser) (Banner, error) {
 
 	content := &bytes.Buffer{}
 	enc := json.NewEncoder(content)
-	if err := enc.Encode(content); err != nil {
+	if err := enc.Encode(request.Content); err != nil {
 		return Banner{}, err
 	}
 
@@ -74,12 +70,12 @@ func (b Router) parseBanner(reader io.ReadCloser) (Banner, error) {
 }
 
 func (b Router) parseTagAndFeatureIds(r *http.Request) (model.Filter, error) {
-	featureId, err := strconv.Atoi(chi.URLParam(r, "feature_id"))
+	featureId, err := strconv.Atoi(r.URL.Query().Get("feature_id"))
 	if err != nil {
 		return model.Filter{}, err
 	}
 
-	tagId, err := strconv.Atoi(chi.URLParam(r, "tag_id"))
+	tagId, err := strconv.Atoi(r.URL.Query().Get("tag_id"))
 	if err != nil {
 		return model.Filter{}, err
 	}
@@ -93,12 +89,12 @@ func (b Router) parseTagAndFeatureIds(r *http.Request) (model.Filter, error) {
 }
 
 func (b Router) parsePage(r *http.Request) (model.Page, error) {
-	limit, err := strconv.Atoi(chi.URLParam(r, "limit"))
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 	if err != nil {
 		return model.Page{}, err
 	}
 
-	offset, err := strconv.Atoi(chi.URLParam(r, "offset"))
+	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
 	if err != nil {
 		return model.Page{}, err
 	}

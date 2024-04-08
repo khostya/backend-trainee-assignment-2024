@@ -34,5 +34,5 @@ func (b Router) create(w http.ResponseWriter, r *http.Request) {
 		BannerId int `json:"banner_id"`
 	}
 
-	httpserver.Response(http.StatusOK, Response{BannerId: id}, r, w)
+	httpserver.Response(http.StatusCreated, Response{BannerId: id}, r, w)
 }

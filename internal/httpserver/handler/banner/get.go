@@ -15,11 +15,7 @@ func (b Router) getUserBanner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	useLastRevision, err := strconv.ParseBool(chi.URLParam(r, "use_last_revision"))
-	if err != nil {
-		httpserver.Error(http.StatusBadRequest, err, r, w)
-		return
-	}
+	useLastRevision, _ := strconv.ParseBool(chi.URLParam(r, "use_last_revision"))
 
 	banner, err := b.banner.GetUserBanner(r.Context(), filter, useLastRevision)
 	if err != nil {

@@ -30,7 +30,7 @@ func NewApp(cfg *config.Config) (App, error) {
 		return App{}, err
 	}
 
-	dependencies := newDependencies(db, cache, cfg.CACHE.TTL)
+	dependencies := newDependencies(db, cache, cfg.CACHE)
 	httpServer := newHttpServer(cfg.HTTP, dependencies)
 
 	return App{httpServer: httpServer, db: db}, nil
