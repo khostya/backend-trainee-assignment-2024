@@ -34,6 +34,8 @@ services:
     image: integration-test
     depends_on:
       - server
+    environment:
+      - HOST=server
 
 volumes:
   pg:

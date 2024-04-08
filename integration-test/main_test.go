@@ -23,6 +23,11 @@ func TestMain(m *testing.M) {
 	cfg := config.MustConfig().HTTP
 
 	host = "localhost:"
+	dockerHost, exists := os.LookupEnv("HOST")
+	if exists {
+		host = dockerHost
+	}
+
 	host += cfg.Port
 	healthPath = "http://" + host + "/healthz"
 	basePath = "http://" + host
