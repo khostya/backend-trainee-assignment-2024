@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 	host = "localhost:"
 	dockerHost, exists := os.LookupEnv("HOST")
 	if exists {
-		host = dockerHost
+		host = dockerHost + ":"
 	}
 
 	host += cfg.Port
