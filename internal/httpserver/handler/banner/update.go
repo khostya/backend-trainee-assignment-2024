@@ -3,6 +3,7 @@ package banner
 import (
 	"backend-trainee-assignment-2024/internal/entity"
 	"backend-trainee-assignment-2024/internal/httpserver"
+	"database/sql"
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -25,7 +26,7 @@ func (b Router) update(w http.ResponseWriter, r *http.Request) {
 	banner := entity.Banner{
 		Id:        id,
 		Content:   request.Content,
-		IsActive:  request.IsActive,
+		IsActive:  sql.NullBool{Valid: true, Bool: request.IsActive},
 		FeatureId: request.FeatureId,
 	}
 	for _, tagId := range request.TagIds {

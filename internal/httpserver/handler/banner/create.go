@@ -3,6 +3,7 @@ package banner
 import (
 	"backend-trainee-assignment-2024/internal/entity"
 	"backend-trainee-assignment-2024/internal/httpserver"
+	"database/sql"
 	"net/http"
 )
 
@@ -14,7 +15,7 @@ func (b Router) create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	banner := entity.Banner{
-		IsActive:  request.IsActive,
+		IsActive:  sql.NullBool{Valid: true, Bool: request.IsActive},
 		FeatureId: request.FeatureId,
 		Content:   request.Content,
 	}

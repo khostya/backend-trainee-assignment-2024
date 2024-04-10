@@ -27,7 +27,7 @@ func NewBanner(banner entity.Banner) Banner {
 		Tags:      tags,
 		FeatureId: banner.FeatureId,
 		Content:   banner.Content,
-		IsActive:  banner.IsActive,
+		IsActive:  banner.IsActive.Bool,
 		CreatedAt: banner.CreatedAt,
 		UpdatedAt: banner.UpdatedAt,
 	}

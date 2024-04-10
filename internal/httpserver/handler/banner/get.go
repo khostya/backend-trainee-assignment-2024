@@ -11,6 +11,7 @@ import (
 )
 
 func (b Router) getUserBanner(w http.ResponseWriter, r *http.Request) {
+	isAdmin := b.isAdmin(r)
 	filter := b.parseFilter(r)
 	if !filter.TagId.Valid || !filter.FeatureId.Valid {
 		httpserver.Error(http.StatusBadRequest, errors.New("feature_id and tag_id is required"), r, w)
@@ -19,7 +20,7 @@ func (b Router) getUserBanner(w http.ResponseWriter, r *http.Request) {
 
 	useLastRevision, _ := strconv.ParseBool(chi.URLParam(r, "use_last_revision"))
 
-	banner, err := b.banner.GetUserBanner(r.Context(), filter, useLastRevision)
+	banner, err := b.banner.GetUserBanner(r.Context(), filter, useLastRevision, isAdmin)
 	if errors.Is(err, entity.ErrNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -33,11 +34,11 @@ func (b Router) getUserBanner(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Router) get(w http.ResponseWriter, r *http.Request) {
+	isAdmin := b.isAdmin(r)
 	filter := b.parseFilter(r)
-
 	page := b.parsePage(r)
 
-	banners, err := b.banner.Get(r.Context(), filter, page)
+	banners, err := b.banner.Get(r.Context(), filter, page, isAdmin)
 	if err != nil {
 		httpserver.Error(http.StatusInternalServerError, err, r, w)
 		return

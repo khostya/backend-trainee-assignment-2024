@@ -93,3 +93,7 @@ func (b Router) parsePage(r *http.Request) model.Page {
 
 	return page
 }
+
+func (b Router) isAdmin(r *http.Request) bool {
+	return r.Context().Value("token") == "admin"
+}

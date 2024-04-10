@@ -2,6 +2,7 @@ package entity
 
 import (
 	"context"
+	"database/sql"
 	"github.com/uptrace/bun"
 	"time"
 )
@@ -11,10 +12,10 @@ type Banner struct {
 
 	Id int `json:"id" bun:",pk,autoincrement"`
 
-	Tags      []Tag  `json:"tags" bun:"rel:has-many,join:id=banner_id"`
-	FeatureId int    `json:"feature_id"`
-	Content   string `json:"content"`
-	IsActive  bool   `json:"is_active"`
+	Tags      []Tag        `json:"tags" bun:"rel:has-many,join:id=banner_id"`
+	FeatureId int          `json:"feature_id"`
+	Content   string       `json:"content"`
+	IsActive  sql.NullBool `json:"is_active"`
 
 	UpdatedAt time.Time `json:"updated_at" bun:",nullzero"`
 	CreatedAt time.Time `json:"created_at" bun:",nullzero"`

@@ -34,11 +34,11 @@ func (uc Banner) DeleteById(ctx context.Context, id int) error {
 	return uc.pg.DeleteById(ctx, id)
 }
 
-func (uc Banner) GetUserBanner(ctx context.Context, filter model.Filter, useLastRevision bool) (entity.Banner, error) {
-	banner, err := uc.pg.GetForUser(ctx, filter)
+func (uc Banner) GetUserBanner(ctx context.Context, filter model.Filter, useLastRevision bool, isAdmin bool) (entity.Banner, error) {
+	banner, err := uc.pg.GetForUser(ctx, filter, isAdmin)
 	return banner, err
 }
 
-func (uc Banner) Get(ctx context.Context, filter model.Filter, page model.Page) ([]entity.Banner, error) {
-	return uc.pg.Get(ctx, filter, page)
+func (uc Banner) Get(ctx context.Context, filter model.Filter, page model.Page, isAdmin bool) ([]entity.Banner, error) {
+	return uc.pg.Get(ctx, filter, page, isAdmin)
 }

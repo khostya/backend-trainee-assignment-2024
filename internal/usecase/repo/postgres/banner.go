@@ -70,13 +70,15 @@ func (r Banner) DeleteById(ctx context.Context, id int) error {
 	return err
 }
 
-func (r Banner) Get(ctx context.Context, filter model.Filter, page model.Page) ([]entity.Banner, error) {
+func (r Banner) Get(ctx context.Context, filter model.Filter, page model.Page, all bool) ([]entity.Banner, error) {
 	where := ""
 	if filter.TagId.Valid {
 		where = "tag_id = " + strconv.FormatInt(int64(filter.TagId.Int32), 10)
 	}
 	if filter.FeatureId.Valid {
-		where += "and "
+		if len(where) != 0 {
+			where += " and "
+		}
 		where += "feature_id = " + strconv.FormatInt(int64(filter.FeatureId.Int32), 10)
 	}
 
@@ -93,12 +95,18 @@ func (r Banner) Get(ctx context.Context, filter model.Filter, page model.Page) (
 		Model(&banners).
 		Where("id in (?)", bannersIds).
 		Relation("Tags")
+
 	if page.Limit.Valid {
 		bannersQuery = bannersQuery.Limit(int(page.Limit.Int32))
 	}
 	if page.Offset.Valid {
 		bannersQuery = bannersQuery.Offset(int(page.Offset.Int32))
 	}
+
+	if !all {
+		bannersQuery = bannersQuery.Where("is_active = true")
+	}
+
 	err := bannersQuery.Scan(ctx)
 	return banners, err
 }
@@ -110,16 +118,20 @@ func (r Banner) getTagsQuery(featureId int) *bun.SelectQuery {
 		Where("feature_id = ?", featureId)
 }
 
-func (r Banner) GetForUser(ctx context.Context, filter model.Filter) (entity.Banner, error) {
+func (r Banner) GetForUser(ctx context.Context, filter model.Filter, all bool) (entity.Banner, error) {
 	var (
 		banner    = new(entity.Banner)
 		tagsQuery = r.getTagsQuery(int(filter.FeatureId.Int32))
 	)
 
-	err := r.db.NewSelect().
+	bannerQuery := r.db.NewSelect().
 		Model(banner).
-		Where("feature_id = ? and ? in (?)", filter.FeatureId, filter.TagId, tagsQuery).
-		Scan(ctx)
+		Where("feature_id = ? and ? in (?)", filter.FeatureId, filter.TagId, tagsQuery)
+	if !all {
+		bannerQuery = bannerQuery.Where("is_active = true")
+	}
+
+	err := bannerQuery.Scan(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
 		return entity.Banner{}, entity.ErrNotFound
 	}
