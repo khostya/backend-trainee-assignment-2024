@@ -9,7 +9,6 @@ create table if not exists banners.banners
     id         serial primary key       not null,
 
     feature_id int                      not null,
-    tags_ids   int[]                    not null,
     content    text                     not null,
     is_active  bool                     not null,
 
