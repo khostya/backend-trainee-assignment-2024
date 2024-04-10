@@ -1,6 +1,8 @@
 package model
 
+import "database/sql"
+
 type Page struct {
-	Limit  int
-	Offset int
+	Limit  sql.NullInt32
+	Offset sql.NullInt32
 }

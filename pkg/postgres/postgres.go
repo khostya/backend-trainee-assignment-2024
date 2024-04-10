@@ -18,7 +18,7 @@ func New(url string, opts ...bun.DBOption) (*Postgres, error) {
 
 	db := bun.NewDB(sqldb, pgdialect.New(), opts...)
 
-	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(false)))
+	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
 
 	initDB(db)
 	err = migrate(db)

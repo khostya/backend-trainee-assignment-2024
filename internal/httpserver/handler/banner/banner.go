@@ -23,7 +23,7 @@ func New(r chi.Router, useCase usecase.Banner) {
 
 	r.Use(auth.Required())
 	r.Get("/user_banner", banner.getUserBanner)
-
+	r.Get("/banner", banner.get)
 	r.Group(func(r chi.Router) {
 		r.Use(auth.AdminOnly())
 
@@ -69,40 +69,27 @@ func (b Router) parseBanner(reader io.ReadCloser) (Banner, error) {
 	return banner, nil
 }
 
-func (b Router) parseTagAndFeatureIds(r *http.Request) (model.Filter, error) {
-	featureId, err := strconv.Atoi(r.URL.Query().Get("feature_id"))
-	if err != nil {
-		return model.Filter{}, err
-	}
+func (b Router) parseFilter(r *http.Request) model.Filter {
+	featureId, featureErr := strconv.Atoi(r.URL.Query().Get("feature_id"))
 
-	tagId, err := strconv.Atoi(r.URL.Query().Get("tag_id"))
-	if err != nil {
-		return model.Filter{}, err
-	}
+	tagId, tagErr := strconv.Atoi(r.URL.Query().Get("tag_id"))
 
 	filter := model.Filter{
-		TagId:     sql.NullInt32{Valid: true, Int32: int32(tagId)},
-		FeatureId: sql.NullInt32{Valid: true, Int32: int32(featureId)},
+		TagId:     sql.NullInt32{Valid: tagErr == nil, Int32: int32(tagId)},
+		FeatureId: sql.NullInt32{Valid: featureErr == nil, Int32: int32(featureId)},
 	}
 
-	return filter, nil
+	return filter
 }
 
-func (b Router) parsePage(r *http.Request) (model.Page, error) {
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil {
-		return model.Page{}, err
-	}
-
-	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
-	if err != nil {
-		return model.Page{}, err
-	}
+func (b Router) parsePage(r *http.Request) model.Page {
+	limit, limitErr := strconv.Atoi(r.URL.Query().Get("limit"))
+	offset, offsetErr := strconv.Atoi(r.URL.Query().Get("offset"))
 
 	page := model.Page{
-		Limit:  limit,
-		Offset: offset,
+		Limit:  sql.NullInt32{Int32: int32(limit), Valid: limitErr == nil},
+		Offset: sql.NullInt32{Int32: int32(offset), Valid: offsetErr == nil},
 	}
 
-	return page, nil
+	return page
 }

@@ -25,8 +25,8 @@ func (uc Banner) Create(ctx context.Context, banner entity.Banner) (int, error) 
 	return id, err
 }
 
-func (uc Banner) Update(ctx context.Context, id int, content string) error {
-	err := uc.pg.Update(ctx, id, content)
+func (uc Banner) Update(ctx context.Context, banner entity.Banner) error {
+	err := uc.pg.Update(ctx, banner)
 	return err
 }
 

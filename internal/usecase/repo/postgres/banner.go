@@ -35,17 +35,31 @@ func (r Banner) Create(ctx context.Context, banner entity.Banner) (int, error) {
 	})
 }
 
-func (r Banner) Update(ctx context.Context, id int, content string) error {
-	exec, err := r.db.NewUpdate().
-		Model(&entity.Banner{}).
-		Where("id = ?", id).
-		Set("content = ?", content).
-		Exec(ctx)
-	affected, _ := exec.RowsAffected()
-	if affected == 0 {
-		return entity.ErrNotFound
-	}
-	return err
+func (r Banner) Update(ctx context.Context, banner entity.Banner) error {
+	return r.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		exec, err := tx.NewUpdate().
+			Model(&banner).
+			WherePK().
+			OmitZero().
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
+		if n, err := exec.RowsAffected(); err == nil && n == 0 {
+			return entity.ErrNotFound
+		}
+
+		_, err = tx.NewDelete().
+			Model(&entity.Tag{}).
+			Where("banner_id = ?", banner.Id).
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.NewInsert().Model(&banner.Tags).Exec(ctx)
+		return err
+	})
 }
 
 func (r Banner) DeleteById(ctx context.Context, id int) error {
@@ -69,30 +83,24 @@ func (r Banner) Get(ctx context.Context, filter model.Filter, page model.Page) (
 	bannersIds := r.db.NewSelect().
 		Model(&entity.Tag{}).
 		Column("banner_id").
-		Where(where).
 		Distinct()
+	if where != "" {
+		bannersIds = bannersIds.Where(where)
+	}
 
 	var banners []entity.Banner
-	_, err := r.db.NewSelect().
+	bannersQuery := r.db.NewSelect().
 		Model(&banners).
 		Where("id in (?)", bannersIds).
-		Limit(page.Limit).
-		Offset(page.Offset).
-		Relation("TagsIds").
-		Exec(ctx)
-	return banners, err
-}
-
-func (r Banner) GetById(ctx context.Context, id int) (entity.Banner, error) {
-	var banner = new(entity.Banner)
-	err := r.db.NewSelect().Model(banner).
-		Where("id = ?", id).
-		Relation("Tags").
-		Scan(ctx)
-	if err != nil {
-		return entity.Banner{}, err
+		Relation("Tags")
+	if page.Limit.Valid {
+		bannersQuery = bannersQuery.Limit(int(page.Limit.Int32))
 	}
-	return *banner, err
+	if page.Offset.Valid {
+		bannersQuery = bannersQuery.Offset(int(page.Offset.Int32))
+	}
+	err := bannersQuery.Scan(ctx)
+	return banners, err
 }
 
 func (r Banner) getTagsQuery(featureId int) *bun.SelectQuery {
@@ -112,8 +120,12 @@ func (r Banner) GetForUser(ctx context.Context, filter model.Filter) (entity.Ban
 		Model(banner).
 		Where("feature_id = ? and ? in (?)", filter.FeatureId, filter.TagId, tagsQuery).
 		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return entity.Banner{}, entity.ErrNotFound
+	}
 	if err != nil {
 		return entity.Banner{}, err
 	}
+
 	return *banner, nil
 }
