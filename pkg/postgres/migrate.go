@@ -20,7 +20,7 @@ func migrate(db *bun.DB) error {
 	if err = migrator.Lock(ctx); err != nil {
 		return err
 	}
-	defer migrator.Unlock(ctx)
+	defer migrator.Unlock(ctx) //nolint
 
 	group, err := migrator.Migrate(ctx)
 	if err != nil {

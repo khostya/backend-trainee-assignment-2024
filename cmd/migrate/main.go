@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer db.Close()
+	defer db.Close() //nolint
 
 	migrator := newMigrator(migrate.NewMigrator(db, migrations.Migrations))
 	app := &cli.App{
@@ -31,7 +31,7 @@ func main() {
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 

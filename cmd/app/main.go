@@ -10,6 +10,7 @@ func main() {
 	cfg := config.MustConfig()
 	app, err := app.NewApp(cfg)
 	if err != nil {
+		app.Shutdown() // nolint
 		log.Fatal(err)
 	}
 	if err := app.Run(); err != nil {

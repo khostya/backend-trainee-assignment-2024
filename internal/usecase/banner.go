@@ -37,7 +37,7 @@ func (uc Banner) DeleteById(ctx context.Context, id int) error {
 	if err != nil {
 		return err
 	}
-	uc.mem.Delete(id)
+	uc.mem.Delete(id) //nolint
 	return nil
 }
 
@@ -48,13 +48,13 @@ func (uc Banner) GetUserBanner(ctx context.Context, filter model.Filter, useLast
 			return banner, err
 		}
 		uc.mem.Set(banner)
-		return banner, err
+		return banner, nil
 	}
 
 	key := memory.Key{TagId: int(filter.TagId.Int32), FeatureId: int(filter.FeatureId.Int32)}.String()
 	banner, err := uc.mem.Get(key)
 	if err == nil {
-		return banner, err
+		return banner, nil
 	}
 
 	banner, err = uc.pg.GetForUser(ctx, filter, isAdmin)
@@ -62,7 +62,7 @@ func (uc Banner) GetUserBanner(ctx context.Context, filter model.Filter, useLast
 		return entity.Banner{}, err
 	}
 	uc.mem.Set(banner)
-	return banner, err
+	return banner, nil
 }
 
 func (uc Banner) Get(ctx context.Context, filter model.Filter, page model.Page, isAdmin bool) ([]entity.Banner, error) {

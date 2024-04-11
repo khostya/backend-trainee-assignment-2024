@@ -19,7 +19,7 @@ func (m *migrator) migrate(c *cli.Context) error {
 	if err := m.migrator.Lock(c.Context); err != nil {
 		return err
 	}
-	defer m.migrator.Unlock(c.Context)
+	defer m.migrator.Unlock(c.Context) //nolint
 
 	group, err := m.migrator.Migrate(c.Context)
 	if err != nil {
@@ -41,7 +41,7 @@ func (m *migrator) rollback(c *cli.Context) error {
 	if err := m.migrator.Lock(c.Context); err != nil {
 		return err
 	}
-	defer m.migrator.Unlock(c.Context)
+	defer m.migrator.Unlock(c.Context) //nolint
 
 	group, err := m.migrator.Rollback(c.Context)
 	if err != nil {
