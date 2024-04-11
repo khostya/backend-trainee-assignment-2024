@@ -9,3 +9,7 @@ migrate-run:
 migrate-rollback:
 	go run ./cmd/migrate db rollback
 .PHONY: migrate-rollback
+
+integration-test:
+	CONFIG_PATH=./../config/config.yml go test -v ./integration-test/...
+.PHONY: integration-test
