@@ -47,7 +47,7 @@ func (app App) Run() error {
 	case s := <-interrupt:
 		err = errors.New("app - Run - signal: " + s.String())
 	case err = <-app.httpServer.Notify():
-		err = fmt.Errorf("wave - app - Run - httpServer.Notify: %w", err)
+		err = fmt.Errorf("app - Run - httpServer.Notify: %w", err)
 	}
 
 	return err
