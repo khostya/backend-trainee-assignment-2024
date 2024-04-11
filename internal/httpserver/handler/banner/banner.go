@@ -24,6 +24,7 @@ func New(r chi.Router, useCase usecase.Banner) {
 	r.Use(auth.Required())
 	r.Get("/user_banner", banner.getUserBanner)
 	r.Get("/banner", banner.get)
+
 	r.Group(func(r chi.Router) {
 		r.Use(auth.AdminOnly())
 

@@ -6,6 +6,7 @@ import (
 	"backend-trainee-assignment-2024/internal/usecase/repo/memory"
 	"backend-trainee-assignment-2024/internal/usecase/repo/postgres"
 	"context"
+	"math/rand"
 )
 
 type Banner struct {
@@ -22,20 +23,45 @@ func (uc Banner) Create(ctx context.Context, banner entity.Banner) (int, error) 
 	if err != nil {
 		return 0, err
 	}
+	banner.Id = id
+	uc.mem.Set(banner)
 	return id, err
 }
 
 func (uc Banner) Update(ctx context.Context, banner entity.Banner) error {
-	err := uc.pg.Update(ctx, banner)
-	return err
+	return uc.pg.Update(ctx, banner)
 }
 
 func (uc Banner) DeleteById(ctx context.Context, id int) error {
-	return uc.pg.DeleteById(ctx, id)
+	err := uc.pg.DeleteById(ctx, id)
+	if err != nil {
+		return err
+	}
+	uc.mem.Delete(id)
+	return nil
 }
 
 func (uc Banner) GetUserBanner(ctx context.Context, filter model.Filter, useLastRevision bool, isAdmin bool) (entity.Banner, error) {
-	banner, err := uc.pg.GetForUser(ctx, filter, isAdmin)
+	if useLastRevision || rand.Intn(10) == 0 {
+		banner, err := uc.pg.GetForUser(ctx, filter, isAdmin)
+		if err != nil {
+			return banner, err
+		}
+		uc.mem.Set(banner)
+		return banner, err
+	}
+
+	key := memory.Key{TagId: int(filter.TagId.Int32), FeatureId: int(filter.FeatureId.Int32)}.String()
+	banner, err := uc.mem.Get(key)
+	if err == nil {
+		return banner, err
+	}
+
+	banner, err = uc.pg.GetForUser(ctx, filter, isAdmin)
+	if err != nil {
+		return entity.Banner{}, err
+	}
+	uc.mem.Set(banner)
 	return banner, err
 }
 

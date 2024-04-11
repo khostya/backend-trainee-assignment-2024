@@ -5,7 +5,6 @@ import (
 	"backend-trainee-assignment-2024/internal/httpserver"
 	"backend-trainee-assignment-2024/internal/model"
 	"errors"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
 )
@@ -18,7 +17,7 @@ func (b Router) getUserBanner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	useLastRevision, _ := strconv.ParseBool(chi.URLParam(r, "use_last_revision"))
+	useLastRevision, _ := strconv.ParseBool(r.URL.Query().Get("use_last_revision"))
 
 	banner, err := b.banner.GetUserBanner(r.Context(), filter, useLastRevision, isAdmin)
 	if errors.Is(err, entity.ErrNotFound) {

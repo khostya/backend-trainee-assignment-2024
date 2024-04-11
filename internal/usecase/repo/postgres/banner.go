@@ -131,7 +131,7 @@ func (r Banner) GetForUser(ctx context.Context, filter model.Filter, all bool) (
 		bannerQuery = bannerQuery.Where("is_active = true")
 	}
 
-	err := bannerQuery.Scan(ctx)
+	err := bannerQuery.Relation("Tags").Scan(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
 		return entity.Banner{}, entity.ErrNotFound
 	}
