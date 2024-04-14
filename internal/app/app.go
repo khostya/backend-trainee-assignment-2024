@@ -59,7 +59,7 @@ func (app App) Shutdown() error {
 		log.Println(fmt.Errorf("app - Run - httpServer.Shutdown: %w", httpErr))
 	}
 	dbErr := app.db.Close()
-	if httpErr != nil {
+	if dbErr != nil {
 		log.Println(fmt.Errorf("app - Run - db.Close: %w", dbErr))
 	}
 	return errors.Join(httpErr, dbErr)

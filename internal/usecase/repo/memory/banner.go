@@ -2,6 +2,7 @@ package memory
 
 import (
 	"backend-trainee-assignment-2024/internal/entity"
+	"backend-trainee-assignment-2024/internal/model"
 	"github.com/dgraph-io/ristretto"
 	"time"
 )
@@ -18,7 +19,7 @@ func NewBanner(cache *ristretto.Cache, ttl time.Duration) Banner {
 func (mem Banner) Get(key any) (entity.Banner, error) {
 	obj, ok := mem.cache.Get(key)
 	if !ok {
-		return entity.Banner{}, entity.ErrNotFound
+		return entity.Banner{}, model.ErrNotFound
 	}
 	return *obj.(*entity.Banner), nil
 }

@@ -46,7 +46,7 @@ func (r Banner) Update(ctx context.Context, banner entity.Banner) error {
 			return err
 		}
 		if n, err := exec.RowsAffected(); err == nil && n == 0 {
-			return entity.ErrNotFound
+			return model.ErrNotFound
 		}
 
 		_, err = tx.NewDelete().
@@ -65,7 +65,7 @@ func (r Banner) Update(ctx context.Context, banner entity.Banner) error {
 func (r Banner) DeleteById(ctx context.Context, id int) error {
 	_, err := r.db.NewDelete().Model(&entity.Banner{}).Where("id = ?", id).Exec(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
-		return entity.ErrNotFound
+		return model.ErrNotFound
 	}
 	return err
 }
@@ -133,7 +133,7 @@ func (r Banner) GetForUser(ctx context.Context, filter model.Filter, all bool) (
 
 	err := bannerQuery.Relation("Tags").Scan(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
-		return entity.Banner{}, entity.ErrNotFound
+		return entity.Banner{}, model.ErrNotFound
 	}
 	if err != nil {
 		return entity.Banner{}, err

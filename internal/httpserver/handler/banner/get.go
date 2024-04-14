@@ -1,7 +1,6 @@
 package banner
 
 import (
-	"backend-trainee-assignment-2024/internal/entity"
 	"backend-trainee-assignment-2024/internal/httpserver"
 	"backend-trainee-assignment-2024/internal/model"
 	"errors"
@@ -20,7 +19,7 @@ func (b Router) getUserBanner(w http.ResponseWriter, r *http.Request) {
 	useLastRevision, _ := strconv.ParseBool(r.URL.Query().Get("use_last_revision"))
 
 	banner, err := b.banner.GetUserBanner(r.Context(), filter, useLastRevision, isAdmin)
-	if errors.Is(err, entity.ErrNotFound) {
+	if errors.Is(err, model.ErrNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}

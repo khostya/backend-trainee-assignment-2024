@@ -43,12 +43,7 @@ func (uc Banner) DeleteById(ctx context.Context, id int) error {
 
 func (uc Banner) GetUserBanner(ctx context.Context, filter model.Filter, useLastRevision bool, isAdmin bool) (entity.Banner, error) {
 	if useLastRevision || rand.Intn(10) == 0 {
-		banner, err := uc.pg.GetForUser(ctx, filter, isAdmin)
-		if err != nil {
-			return banner, err
-		}
-		uc.mem.Set(banner)
-		return banner, nil
+		return uc.getUserBanner(ctx, filter, isAdmin)
 	}
 
 	key := memory.Key{TagId: int(filter.TagId.Int32), FeatureId: int(filter.FeatureId.Int32)}.String()
@@ -57,9 +52,13 @@ func (uc Banner) GetUserBanner(ctx context.Context, filter model.Filter, useLast
 		return banner, nil
 	}
 
-	banner, err = uc.pg.GetForUser(ctx, filter, isAdmin)
+	return uc.getUserBanner(ctx, filter, isAdmin)
+}
+
+func (uc Banner) getUserBanner(ctx context.Context, filter model.Filter, isAdmin bool) (entity.Banner, error) {
+	banner, err := uc.pg.GetForUser(ctx, filter, isAdmin)
 	if err != nil {
-		return entity.Banner{}, err
+		return banner, err
 	}
 	uc.mem.Set(banner)
 	return banner, nil

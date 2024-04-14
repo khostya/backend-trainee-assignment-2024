@@ -1,8 +1,8 @@
 package banner
 
 import (
-	"backend-trainee-assignment-2024/internal/entity"
 	"backend-trainee-assignment-2024/internal/httpserver"
+	"backend-trainee-assignment-2024/internal/model"
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -18,7 +18,7 @@ func (b Router) deleteById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = b.banner.DeleteById(r.Context(), bannerId)
-	if errors.Is(err, entity.ErrNotFound) {
+	if errors.Is(err, model.ErrNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
