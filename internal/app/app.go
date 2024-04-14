@@ -6,7 +6,7 @@ import (
 	"backend-trainee-assignment-2024/pkg/postgres"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -56,11 +56,11 @@ func (app App) Run() error {
 func (app App) Shutdown() error {
 	httpErr := app.httpServer.Shutdown()
 	if httpErr != nil {
-		log.Println(fmt.Errorf("app - Run - httpServer.Shutdown: %w", httpErr))
+		slog.Error(fmt.Sprintf("app - Run - httpServer.Shutdown: %s", httpErr))
 	}
 	dbErr := app.db.Close()
 	if dbErr != nil {
-		log.Println(fmt.Errorf("app - Run - db.Close: %w", dbErr))
+		slog.Error(fmt.Sprintf("app - Run - db.Close: %s", dbErr))
 	}
 	return errors.Join(httpErr, dbErr)
 }
